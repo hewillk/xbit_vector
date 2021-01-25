@@ -45,7 +45,7 @@ int main() {
   assert(v.num_blocks() == 3);
 
   auto base_view = std::views::transform([](auto c){ return "ACGT"[c]; });
-  auto comp_view = std::views::transform([](auto c){ return 0b11 - c; });
+  auto comp_view = std::views::transform([](auto c){ return 0b11u - c; });
   std::cout << "Reverse complement of ";
   std::ranges::copy(v | base_view, std::ostream_iterator<char>{std::cout, ""});
   std::cout << " is ";
@@ -57,6 +57,7 @@ int main() {
 ## Building and Testing
 ```
 $ mkdir build && cd build
+$ cmake ..
 $ make
 $ make test
 ```
