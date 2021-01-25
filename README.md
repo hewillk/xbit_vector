@@ -1,7 +1,7 @@
 ## Biomodern-XbitVector
-`Biomodern.DibitVector` and `QuadVector` is a space efficient container for dibit and quadbit values, you can think of it as a specialization of `std::vector` for type `uint2_t` and `uint4_t`.
+`Biomodern.DibitVector` and `QuadVector` is a space-efficient container for dibit and quadbit values, you can think of it as a specialization of `std::vector` for type `uint2_t` and `uint4_t`.
 
-The implementation detail is refer to [GCC][GCC] and [Clang][Clang]'s implementation of [`vector<bool>`][vector_of_bool] with adopt new C++20 technology such as [`iterator concepts`][iterator_concept], `operator<=>` etc.
+The implementation detail is refered to [GCC][GCC] and [Clang][Clang]'s implementation of [`vector<bool>`][vector_of_bool] with adopting new C++20 technology such as [`iterator concepts`][iterator_concept], `operator<=>` etc.
   
 The synopsis of those two containers is:
 ```cpp
@@ -13,7 +13,7 @@ class DibitVector;
 ```
 which `Block` refers to the underlying storage type, the default type is `uint8_t` which can store 4 dibits or 2 quadbits in one block. 
 
-The member types and functions definition are just same as [`vector<bool>`][vector_of_bool] with following additions:
+The member types and functions definition is just the same as [`vector<bool>`][vector_of_bool] with following additions:
 ```cpp
 block_type; // alias to Block.
 size_type num_blocks(); // return the number of underlying blocks.
@@ -21,7 +21,7 @@ block_type* data();
 block_type* data() const; // return the begin pointer to the underlying blocks.
 void flip(); // flip all the dibits/quadbits of the vector.
 ```
-Like `vector<bool>`, those two containers can work with all algorithms in [`<algorithm>`][algorithm] even if [`ranges::sort`][ranges_sort] which cannot sort `vector<bool>` currently. Note that the `value_type` of those two containers is `uint8_t` which is not printable character, make sure cast it to `int` before you print:
+Like `vector<bool>`, those two containers can work with all algorithms in [`<algorithm>`][algorithm] even if [`ranges::sort`][ranges_sort] which cannot sort `vector<bool>` currently. Note that the `value_type` of those two containers is `uint8_t` which is not a printable character, make sure to cast it to `int` before you print:
 ```cpp
 std::cout << static_cast<int>(v.front()) << "\n";
 std::cout << +v.back() << "\n";
