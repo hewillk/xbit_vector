@@ -1,7 +1,7 @@
 ## Biomodern-XbitVector
 `Biomodern.DibitVector` and `QuadVector` is a space-efficient container for dibit and quadbit values, you can think of it as a specialization of `std::vector` for type `uint2_t` and `uint4_t`.
 
-The implementation detail is refered to [GCC][GCC] and [Clang][Clang]'s implementation of [`vector<bool>`][vector_of_bool] with adopting new C++20 technology such as [`iterator concepts`][iterator_concept], `operator<=>` etc.
+The implementation detail is refered to [GCC][GCC] and [Clang][Clang]'s implementation of [`vector<bool>`][vector_of_bool] with adopting new C++20 features such as [`iterator concepts`][iterator_concept], `operator<=>` etc.
   
 The synopsis of those two containers is:
 ```cpp
