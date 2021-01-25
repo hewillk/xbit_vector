@@ -32,12 +32,12 @@ If you want to serialize those two containers, you can use my other project [`Bi
 - GCC 10.2
 
 ## Usage
-This project is header-only and has no dependency with other libraries, if you want use it, just copy and paste.
+This project is header-only and has no dependency with other libraries, if you want use it, just [copy and paste][godbolt].
 ```cpp
 #include <algorithm>
 #include <iostream>
 #include <ranges>
-#include "xbit_vector.hpp"
+#include "xbit_vector/xbit_vector.hpp"
 
 int main() {
   biomodern::DibitVector<> v{3, 2, 1, 2, 3, 0, 0, 1, 2};
@@ -67,3 +67,4 @@ $ make test
 [algorithm]: https://en.cppreference.com/w/cpp/algorithm
 [ranges_sort]: https://godbolt.org/z/xb1195
 [Biomodern.Serializer]: https://github.com/hewillk/serializer
+[godbolt]: https://godbolt.org/z/YM5P61
