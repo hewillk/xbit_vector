@@ -2,6 +2,7 @@
 #define BIOMODERN__XBIT_VECTOR_HPP_
 
 #include <cassert>
+#include <concepts>
 #include <climits>
 #include <limits>
 #include <stdexcept>
