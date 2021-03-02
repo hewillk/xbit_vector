@@ -1,9 +1,8 @@
-#ifndef BIOMODERN__XBIT_VECTOR_HPP_
-#define BIOMODERN__XBIT_VECTOR_HPP_
+#pragma once
 
 #include <cassert>
-#include <concepts>
 #include <climits>
+#include <concepts>
 #include <limits>
 #include <stdexcept>
 
@@ -23,13 +22,9 @@ class XbitReference {
   constexpr XbitReference(Block* seg, std::size_t offset) noexcept
       : seg_(seg), shift_(offset * N) {}
 
-  constexpr operator std::uint8_t() const noexcept {
-    return *seg_ >> shift_ & mask;
-  }
+  constexpr operator std::uint8_t() const noexcept { return *seg_ >> shift_ & mask; }
 
-  constexpr XbitReference& operator++() noexcept {
-    return operator=(*this + 1);
-  }
+  constexpr XbitReference& operator++() noexcept { return operator=(*this + 1); }
 
   constexpr std::uint8_t operator++(int) noexcept {
     std::uint8_t tmp = *this;
@@ -37,9 +32,7 @@ class XbitReference {
     return tmp;
   }
 
-  constexpr XbitReference& operator--() noexcept {
-    return operator=(*this - 1);
-  }
+  constexpr XbitReference& operator--() noexcept { return operator=(*this - 1); }
 
   constexpr std::uint8_t operator--(int) noexcept {
     std::uint8_t tmp = *this;
@@ -61,8 +54,7 @@ class XbitReference {
 };
 
 template <std::size_t N, std::unsigned_integral Block>
-inline void swap(XbitReference<N, Block> x,
-                 XbitReference<N, Block> y) noexcept {
+inline void swap(XbitReference<N, Block> x, XbitReference<N, Block> y) noexcept {
   std::uint8_t t = x;
   x = y;
   y = t;
@@ -100,13 +92,11 @@ class XbitIteratorBase {
   constexpr XbitIteratorBase(Block* seg, std::size_t offset) noexcept
       : seg_(seg), offset_(offset) {}
 
-  constexpr friend difference_type operator-(const XbitIteratorBase& x,
-                                             const XbitIteratorBase& y) {
+  constexpr friend difference_type operator-(const XbitIteratorBase& x, const XbitIteratorBase& y) {
     return (x.seg_ - y.seg_) * xbits_per_block + x.offset_ - y.offset_;
   }
 
-  constexpr bool operator==(const XbitIteratorBase& other) const noexcept =
-      default;
+  constexpr bool operator==(const XbitIteratorBase& other) const noexcept = default;
 
   constexpr auto operator<=>(const XbitIteratorBase& other) const noexcept {
     if (auto cmp = seg_ <=> other.seg_; cmp != 0) return cmp;
@@ -115,8 +105,7 @@ class XbitIteratorBase {
 
  protected:
   constexpr void bump_up() {
-    if (offset_ != xbits_per_block - 1)
-      ++offset_;
+    if (offset_ != xbits_per_block - 1) ++offset_;
     else {
       offset_ = 0;
       ++seg_;
@@ -124,8 +113,7 @@ class XbitIteratorBase {
   }
 
   constexpr void bump_down() {
-    if (offset_ != 0)
-      --offset_;
+    if (offset_ != 0) --offset_;
     else {
       offset_ = xbits_per_block - 1;
       --seg_;
@@ -133,8 +121,7 @@ class XbitIteratorBase {
   }
 
   constexpr void incr(difference_type n) {
-    if (n >= 0)
-      seg_ += (n + offset_) / xbits_per_block;
+    if (n >= 0) seg_ += (n + offset_) / xbits_per_block;
     else
       seg_ += static_cast<difference_type>(n - xbits_per_block + offset_ + 1) /
               static_cast<difference_type>(xbits_per_block);
@@ -161,13 +148,9 @@ struct XbitIterator : public XbitIteratorBase<N, Block> {
   constexpr XbitIterator(Block* seg, std::size_t offset) noexcept
       : XbitIteratorBase<N, Block>(seg, offset) {}
 
-  constexpr reference operator*() const noexcept {
-    return reference(this->seg_, this->offset_);
-  }
+  constexpr reference operator*() const noexcept { return reference(this->seg_, this->offset_); }
 
-  constexpr reference operator[](difference_type n) const {
-    return *(*this + n);
-  }
+  constexpr reference operator[](difference_type n) const { return *(*this + n); }
 
   constexpr iterator& operator++() {
     this->bump_up();
@@ -210,9 +193,7 @@ struct XbitIterator : public XbitIteratorBase<N, Block> {
     return tmp;
   }
 
-  constexpr friend iterator operator+(difference_type n, const iterator& it) {
-    return it + n;
-  }
+  constexpr friend iterator operator+(difference_type n, const iterator& it) { return it + n; }
 };
 
 template <std::size_t N, std::unsigned_integral Block>
@@ -226,8 +207,7 @@ struct XbitConstIterator : public XbitIteratorBase<N, Block> {
   typedef value_type const_reference;
   typedef XbitConstIterator const_iterator;
 
-  constexpr XbitConstIterator() noexcept
-      : XbitIteratorBase<N, Block>(nullptr, 0) {}
+  constexpr XbitConstIterator() noexcept : XbitIteratorBase<N, Block>(nullptr, 0) {}
 
   constexpr XbitConstIterator(Block* seg, std::size_t offset) noexcept
       : XbitIteratorBase<N, Block>(seg, offset) {}
@@ -239,9 +219,7 @@ struct XbitConstIterator : public XbitIteratorBase<N, Block> {
     return XbitReference<N, Block>(this->seg_, this->offset_);
   }
 
-  constexpr const_reference operator[](difference_type n) const {
-    return *(*this + n);
-  }
+  constexpr const_reference operator[](difference_type n) const { return *(*this + n); }
 
   constexpr const_iterator& operator++() {
     this->bump_up();
@@ -270,9 +248,7 @@ struct XbitConstIterator : public XbitIteratorBase<N, Block> {
     return *this;
   }
 
-  constexpr const_iterator& operator-=(difference_type n) {
-    return *this += -n;
-  }
+  constexpr const_iterator& operator-=(difference_type n) { return *this += -n; }
 
   constexpr const_iterator operator+(difference_type n) const {
     const_iterator tmp(*this);
@@ -286,8 +262,7 @@ struct XbitConstIterator : public XbitIteratorBase<N, Block> {
     return tmp;
   }
 
-  constexpr friend const_iterator operator+(difference_type n,
-                                            const const_iterator& it) {
+  constexpr friend const_iterator operator+(difference_type n, const const_iterator& it) {
     return it + n;
   }
 };
@@ -305,10 +280,8 @@ class XbitVectorBase {
   }
 };
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-requires(!std::same_as<Block, bool>) class XbitVector
-    : private detail::XbitVectorBase {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+requires(!std::same_as<Block, bool>) class XbitVector : private detail::XbitVectorBase {
  public:
   typedef std::uint8_t value_type;
   typedef Block block_type;
@@ -334,8 +307,7 @@ requires(!std::same_as<Block, bool>) class XbitVector
   /*[[no_unique_address]]*/ allocator_type alloc_{};
 
  public:
-  constexpr XbitVector() noexcept(
-      std::is_nothrow_default_constructible_v<allocator_type>);
+  constexpr XbitVector() noexcept(std::is_nothrow_default_constructible_v<allocator_type>);
 
   constexpr explicit XbitVector(const allocator_type& a) noexcept;
 
@@ -347,21 +319,17 @@ requires(!std::same_as<Block, bool>) class XbitVector
 
   constexpr XbitVector(size_type n, const value_type& x);
 
-  constexpr XbitVector(size_type n, const value_type& x,
-                       const allocator_type& a);
+  constexpr XbitVector(size_type n, const value_type& x, const allocator_type& a);
 
-  constexpr XbitVector(std::input_iterator auto first,
-                       std::input_iterator auto last);
+  constexpr XbitVector(std::input_iterator auto first, std::input_iterator auto last);
 
-  constexpr XbitVector(std::input_iterator auto first,
-                       std::input_iterator auto last, const allocator_type& a);
+  constexpr XbitVector(
+      std::input_iterator auto first, std::input_iterator auto last, const allocator_type& a);
 
-  constexpr XbitVector(std::forward_iterator auto first,
-                       std::forward_iterator auto last);
+  constexpr XbitVector(std::forward_iterator auto first, std::forward_iterator auto last);
 
-  constexpr XbitVector(std::forward_iterator auto first,
-                       std::forward_iterator auto last,
-                       const allocator_type& a);
+  constexpr XbitVector(
+      std::forward_iterator auto first, std::forward_iterator auto last, const allocator_type& a);
 
   constexpr XbitVector(const XbitVector& v);
 
@@ -371,8 +339,7 @@ requires(!std::same_as<Block, bool>) class XbitVector
 
   constexpr XbitVector(std::initializer_list<value_type> il);
 
-  constexpr XbitVector(std::initializer_list<value_type> il,
-                       const allocator_type& a);
+  constexpr XbitVector(std::initializer_list<value_type> il, const allocator_type& a);
 
   constexpr XbitVector(XbitVector&& v) noexcept;
 
@@ -387,27 +354,19 @@ requires(!std::same_as<Block, bool>) class XbitVector
     return *this;
   }
 
-  constexpr void assign(std::input_iterator auto first,
-                        std::input_iterator auto last);
+  constexpr void assign(std::input_iterator auto first, std::input_iterator auto last);
 
-  constexpr void assign(std::forward_iterator auto first,
-                        std::forward_iterator auto last);
+  constexpr void assign(std::forward_iterator auto first, std::forward_iterator auto last);
 
   constexpr void assign(size_type n, const value_type& x);
 
-  constexpr void assign(std::initializer_list<value_type> il) {
-    assign(il.begin(), il.end());
-  }
+  constexpr void assign(std::initializer_list<value_type> il) { assign(il.begin(), il.end()); }
 
-  constexpr allocator_type get_allocator() const noexcept {
-    return allocator_type(this->alloc_);
-  }
+  constexpr allocator_type get_allocator() const noexcept { return allocator_type(this->alloc_); }
 
   constexpr size_type max_size() const noexcept;
 
-  constexpr size_type capacity() const noexcept {
-    return internal_cap_to_external(cap_);
-  }
+  constexpr size_type capacity() const noexcept { return internal_cap_to_external(cap_); }
 
   constexpr size_type size() const noexcept { return size_; }
 
@@ -429,21 +388,13 @@ requires(!std::same_as<Block, bool>) class XbitVector
 
   constexpr const_iterator end() const noexcept { return make_iter(size_); }
 
-  constexpr reverse_iterator rbegin() noexcept {
-    return reverse_iterator(end());
-  }
+  constexpr reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
 
-  constexpr const_reverse_iterator rbegin() const noexcept {
-    return const_reverse_iterator(end());
-  }
+  constexpr const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
 
-  constexpr reverse_iterator rend() noexcept {
-    return reverse_iterator(begin());
-  }
+  constexpr reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
 
-  constexpr const_reverse_iterator rend() const noexcept {
-    return const_reverse_iterator(begin());
-  }
+  constexpr const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
 
   constexpr const_iterator cbegin() const noexcept { return make_iter(0); }
 
@@ -455,9 +406,7 @@ requires(!std::same_as<Block, bool>) class XbitVector
 
   constexpr reference operator[](size_type n) { return *make_iter(n); }
 
-  constexpr const_reference operator[](size_type n) const {
-    return *make_iter(n);
-  }
+  constexpr const_reference operator[](size_type n) const { return *make_iter(n); }
 
   constexpr reference at(size_type n);
 
@@ -492,19 +441,15 @@ requires(!std::same_as<Block, bool>) class XbitVector
 
   constexpr iterator insert(const_iterator position, const value_type& x);
 
-  constexpr iterator insert(const_iterator position, size_type n,
-                            const value_type& x);
+  constexpr iterator insert(const_iterator position, size_type n, const value_type& x);
 
-  constexpr iterator insert(const_iterator position,
-                            std::input_iterator auto first,
-                            std::input_iterator auto last);
+  constexpr iterator insert(
+      const_iterator position, std::input_iterator auto first, std::input_iterator auto last);
 
-  constexpr iterator insert(const_iterator position,
-                            std::forward_iterator auto first,
-                            std::forward_iterator auto last);
+  constexpr iterator insert(
+      const_iterator position, std::forward_iterator auto first, std::forward_iterator auto last);
 
-  constexpr iterator insert(const_iterator position,
-                            std::initializer_list<value_type> il) {
+  constexpr iterator insert(const_iterator position, std::initializer_list<value_type> il) {
     return insert(position, il.begin(), il.end());
   }
 
@@ -525,8 +470,7 @@ requires(!std::same_as<Block, bool>) class XbitVector
   }
 
   constexpr auto operator<=>(const XbitVector& other) const {
-    return std::lexicographical_compare_three_way(begin(), end(), other.begin(),
-                                                  other.end());
+    return std::lexicographical_compare_three_way(begin(), end(), other.begin(), other.end());
   }
 
  private:
@@ -547,25 +491,22 @@ requires(!std::same_as<Block, bool>) class XbitVector
   }
 
   constexpr static size_type align_it(size_type new_size) noexcept {
-    return (new_size + (xbits_per_block - 1)) / xbits_per_block *
-           xbits_per_block;
+    return (new_size + (xbits_per_block - 1)) / xbits_per_block * xbits_per_block;
   }
 
   constexpr size_type recommend(size_type new_size) const;
 
   constexpr void construct_at_end(size_type n, value_type x);
 
-  constexpr void construct_at_end(std::forward_iterator auto first,
-                                  std::forward_iterator auto last);
+  constexpr void construct_at_end(
+      std::forward_iterator auto first, std::forward_iterator auto last);
 
   constexpr iterator make_iter(size_type pos) noexcept {
-    return iterator(begin_ + pos / xbits_per_block,
-                    pos & (xbits_per_block - 1));
+    return iterator(begin_ + pos / xbits_per_block, pos & (xbits_per_block - 1));
   }
 
   constexpr const_iterator make_iter(size_type pos) const noexcept {
-    return const_iterator(begin_ + pos / xbits_per_block,
-                          pos & (xbits_per_block - 1));
+    return const_iterator(begin_ + pos / xbits_per_block, pos & (xbits_per_block - 1));
   }
 
   constexpr iterator const_iterator_cast(const_iterator p) noexcept {
@@ -573,8 +514,7 @@ requires(!std::same_as<Block, bool>) class XbitVector
   }
 
   constexpr void copy_assign_alloc(const XbitVector& v) {
-    if constexpr (allocator_traits::propagate_on_container_copy_assignment::
-                      value) {
+    if constexpr (allocator_traits::propagate_on_container_copy_assignment::value) {
       if (alloc_ != v.alloc_) vdeallocate();
       alloc_ = v.alloc_;
     }
@@ -586,18 +526,15 @@ requires(!std::same_as<Block, bool>) class XbitVector
   constexpr void move_assign_alloc(XbitVector& v) noexcept(
       !allocator_traits::propagate_on_container_move_assignment::value ||
       std::is_nothrow_move_assignable_v<allocator_type>) {
-    if constexpr (allocator_traits::propagate_on_container_move_assignment::
-                      value)
+    if constexpr (allocator_traits::propagate_on_container_move_assignment::value)
       alloc_ = std::move(v.alloc_);
   }
 };
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr void XbitVector<N, Block, Allocator>::invalidate_all_iterators() {}
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr void XbitVector<N, Block, Allocator>::vallocate(size_type n) {
   if (n > max_size()) this->throw_length_error();
   n = external_cap_to_internal(n);
@@ -606,8 +543,7 @@ constexpr void XbitVector<N, Block, Allocator>::vallocate(size_type n) {
   this->cap_ = n;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr void XbitVector<N, Block, Allocator>::vdeallocate() noexcept {
   if (this->begin_ != nullptr) {
     allocator_traits::deallocate(this->alloc_, this->begin_, this->cap_);
@@ -617,20 +553,18 @@ constexpr void XbitVector<N, Block, Allocator>::vdeallocate() noexcept {
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::size_type
-XbitVector<N, Block, Allocator>::max_size() const noexcept {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::size_type XbitVector<N, Block, Allocator>::max_size()
+    const noexcept {
   size_type amax = allocator_traits::max_size(alloc_);
   size_type nmax = std::numeric_limits<size_type>::max() / 2;
   if (nmax / xbits_per_block <= amax) return nmax;
   return internal_cap_to_external(amax);
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::size_type
-XbitVector<N, Block, Allocator>::recommend(size_type new_size) const {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::size_type XbitVector<N, Block, Allocator>::recommend(
+    size_type new_size) const {
   const size_type ms = max_size();
   if (new_size > ms) this->throw_length_error();
   const size_type cap = capacity();
@@ -638,17 +572,14 @@ XbitVector<N, Block, Allocator>::recommend(size_type new_size) const {
   return std::max(2 * cap, align_it(new_size));
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr void XbitVector<N, Block, Allocator>::construct_at_end(size_type n,
-                                                                 value_type x) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr void XbitVector<N, Block, Allocator>::construct_at_end(size_type n, value_type x) {
   size_type old_size = this->size_;
   this->size_ += n;
   std::fill_n(make_iter(old_size), n, x);
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr void XbitVector<N, Block, Allocator>::construct_at_end(
     std::forward_iterator auto first, std::forward_iterator auto last) {
   size_type old_size = this->size_;
@@ -656,19 +587,15 @@ constexpr void XbitVector<N, Block, Allocator>::construct_at_end(
   std::copy(first, last, make_iter(old_size));
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr XbitVector<N, Block, Allocator>::XbitVector() noexcept(
     std::is_nothrow_default_constructible_v<allocator_type>) {}
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::XbitVector(
-    const allocator_type& a) noexcept
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::XbitVector(const allocator_type& a) noexcept
     : cap_(0), alloc_(a) {}
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr XbitVector<N, Block, Allocator>::XbitVector(size_type n) {
   if (n > 0) {
     vallocate(n);
@@ -676,10 +603,8 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(size_type n) {
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::XbitVector(size_type n,
-                                                      const allocator_type& a)
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::XbitVector(size_type n, const allocator_type& a)
     : cap_(0), alloc_(a) {
   if (n > 0) {
     vallocate(n);
@@ -687,21 +612,17 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(size_type n,
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::XbitVector(size_type n,
-                                                      const value_type& x) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::XbitVector(size_type n, const value_type& x) {
   if (n > 0) {
     vallocate(n);
     construct_at_end(n, x);
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::XbitVector(size_type n,
-                                                      const value_type& x,
-                                                      const allocator_type& a)
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::XbitVector(
+    size_type n, const value_type& x, const allocator_type& a)
     : cap_(0), alloc_(a) {
   if (n > 0) {
     vallocate(n);
@@ -709,8 +630,7 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(size_type n,
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr XbitVector<N, Block, Allocator>::XbitVector(
     std::input_iterator auto first, std::input_iterator auto last) {
   try {
@@ -722,11 +642,9 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr XbitVector<N, Block, Allocator>::XbitVector(
-    std::input_iterator auto first, std::input_iterator auto last,
-    const allocator_type& a)
+    std::input_iterator auto first, std::input_iterator auto last, const allocator_type& a)
     : cap_(0), alloc_(a) {
   try {
     for (; first != last; ++first) push_back(*first);
@@ -737,8 +655,7 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr XbitVector<N, Block, Allocator>::XbitVector(
     std::forward_iterator auto first, std::forward_iterator auto last) {
   const size_type n = std::distance(first, last);
@@ -748,11 +665,9 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr XbitVector<N, Block, Allocator>::XbitVector(
-    std::forward_iterator auto first, std::forward_iterator auto last,
-    const allocator_type& a)
+    std::forward_iterator auto first, std::forward_iterator auto last, const allocator_type& a)
     : cap_(0), alloc_(a) {
   const size_type n = std::distance(first, last);
   if (n > 0) {
@@ -761,10 +676,8 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::XbitVector(
-    std::initializer_list<value_type> il) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::XbitVector(std::initializer_list<value_type> il) {
   const size_type n = il.size();
   if (n > 0) {
     vallocate(n);
@@ -772,8 +685,7 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr XbitVector<N, Block, Allocator>::XbitVector(
     std::initializer_list<value_type> il, const allocator_type& a)
     : cap_(0), alloc_(a) {
@@ -784,29 +696,23 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr XbitVector<N, Block, Allocator>::~XbitVector() {
   if (begin_ != nullptr) allocator_traits::deallocate(alloc_, begin_, cap_);
   invalidate_all_iterators();
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr XbitVector<N, Block, Allocator>::XbitVector(const XbitVector& v)
-    : cap_(0),
-      alloc_(
-          allocator_traits::select_on_container_copy_construction(v.alloc_)) {
+    : cap_(0), alloc_(allocator_traits::select_on_container_copy_construction(v.alloc_)) {
   if (v.size() > 0) {
     vallocate(v.size());
     construct_at_end(v.begin(), v.end());
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::XbitVector(const XbitVector& v,
-                                                      const allocator_type& a)
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::XbitVector(const XbitVector& v, const allocator_type& a)
     : cap_(0), alloc_(a) {
   if (v.size() > 0) {
     vallocate(v.size());
@@ -814,10 +720,9 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(const XbitVector& v,
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>&
-XbitVector<N, Block, Allocator>::operator=(const XbitVector& v) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>& XbitVector<N, Block, Allocator>::operator=(
+    const XbitVector& v) {
   if (this != &v) {
     copy_assign_alloc(v);
     if (v.size_) {
@@ -832,8 +737,7 @@ XbitVector<N, Block, Allocator>::operator=(const XbitVector& v) {
   return *this;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr XbitVector<N, Block, Allocator>::XbitVector(XbitVector&& v) noexcept
     : begin_(v.begin_), size_(v.size_), cap_(v.cap_), alloc_(v.alloc_) {
   v.begin_ = nullptr;
@@ -841,10 +745,8 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(XbitVector&& v) noexcept
   v.cap_ = 0;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::XbitVector(XbitVector&& v,
-                                                      const allocator_type& a)
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::XbitVector(XbitVector&& v, const allocator_type& a)
     : cap_(0), alloc_(a) {
   if (a == allocator_type(v.alloc_)) {
     this->begin_ = v.begin_;
@@ -858,27 +760,23 @@ constexpr XbitVector<N, Block, Allocator>::XbitVector(XbitVector&& v,
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr XbitVector<N, Block, Allocator>&
 XbitVector<N, Block, Allocator>::operator=(XbitVector&& v) noexcept(
     allocator_traits::propagate_on_container_move_assignment::value ||
     allocator_traits::is_always_equal::value) {
-  if constexpr (allocator_traits::propagate_on_container_move_assignment::value)
-    move_assign(v);
+  if constexpr (allocator_traits::propagate_on_container_move_assignment::value) move_assign(v);
   else {
-    if (alloc_ != v.alloc_)
-      assign(v.begin(), v.end());
+    if (alloc_ != v.alloc_) assign(v.begin(), v.end());
     else
       move_assign(v);
   }
   return *this;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr void XbitVector<N, Block, Allocator>::move_assign(
-    XbitVector& c) noexcept(std::is_nothrow_move_assignable_v<allocator_type>) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr void XbitVector<N, Block, Allocator>::move_assign(XbitVector& c) noexcept(
+    std::is_nothrow_move_assignable_v<allocator_type>) {
   vdeallocate();
   move_assign_alloc(c);
   this->begin_ = c.begin_;
@@ -888,15 +786,12 @@ constexpr void XbitVector<N, Block, Allocator>::move_assign(
   c.cap_ = c.size_ = 0;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr void XbitVector<N, Block, Allocator>::assign(size_type n,
-                                                       const value_type& x) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr void XbitVector<N, Block, Allocator>::assign(size_type n, const value_type& x) {
   size_ = 0;
   if (n > 0) {
     size_type c = capacity();
-    if (n <= c)
-      size_ = n;
+    if (n <= c) size_ = n;
     else {
       XbitVector v(alloc_);
       v.reserve(recommend(n));
@@ -908,16 +803,14 @@ constexpr void XbitVector<N, Block, Allocator>::assign(size_type n,
   invalidate_all_iterators();
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr void XbitVector<N, Block, Allocator>::assign(
     std::input_iterator auto first, std::input_iterator auto last) {
   clear();
   for (; first != last; ++first) push_back(*first);
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr void XbitVector<N, Block, Allocator>::assign(
     std::forward_iterator auto first, std::forward_iterator auto last) {
   clear();
@@ -933,8 +826,7 @@ constexpr void XbitVector<N, Block, Allocator>::assign(
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr void XbitVector<N, Block, Allocator>::reserve(size_type n) {
   if (n > capacity()) {
     XbitVector v(this->alloc_);
@@ -945,46 +837,39 @@ constexpr void XbitVector<N, Block, Allocator>::reserve(size_type n) {
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr void XbitVector<N, Block, Allocator>::shrink_to_fit() noexcept {
   if (external_cap_to_internal(size()) > cap_) {
     try {
       XbitVector(*this, allocator_type(alloc_)).swap(*this);
-    } catch (...) {
-    }
+    } catch (...) {}
   }
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::reference
-XbitVector<N, Block, Allocator>::at(size_type n) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::reference XbitVector<N, Block, Allocator>::at(
+    size_type n) {
   if (n >= size()) this->throw_out_of_range();
   return (*this)[n];
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::const_reference
-XbitVector<N, Block, Allocator>::at(size_type n) const {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::const_reference XbitVector<N, Block, Allocator>::at(
+    size_type n) const {
   if (n >= size()) this->throw_out_of_range();
   return (*this)[n];
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr void XbitVector<N, Block, Allocator>::push_back(const value_type& x) {
   if (this->size_ == this->capacity()) reserve(recommend(this->size_ + 1));
   ++this->size_;
   back() = x;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::iterator
-XbitVector<N, Block, Allocator>::insert(const_iterator position,
-                                        const value_type& x) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::iterator XbitVector<N, Block, Allocator>::insert(
+    const_iterator position, const value_type& x) {
   iterator r;
   if (size() < capacity()) {
     const_iterator old_end = end();
@@ -1003,11 +888,9 @@ XbitVector<N, Block, Allocator>::insert(const_iterator position,
   return r;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::iterator
-XbitVector<N, Block, Allocator>::insert(const_iterator position, size_type n,
-                                        const value_type& x) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::iterator XbitVector<N, Block, Allocator>::insert(
+    const_iterator position, size_type n, const value_type& x) {
   iterator r;
   size_type c = capacity();
   if (n <= c && size() <= c - n) {
@@ -1027,12 +910,10 @@ XbitVector<N, Block, Allocator>::insert(const_iterator position, size_type n,
   return r;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr typename XbitVector<N, Block, Allocator>::iterator
-XbitVector<N, Block, Allocator>::insert(const_iterator position,
-                                        std::input_iterator auto first,
-                                        std::input_iterator auto last) {
+XbitVector<N, Block, Allocator>::insert(
+    const_iterator position, std::input_iterator auto first, std::input_iterator auto last) {
   difference_type off = position - begin();
   iterator p = const_iterator_cast(position);
   iterator old_end = end();
@@ -1059,12 +940,9 @@ XbitVector<N, Block, Allocator>::insert(const_iterator position,
   return begin() + off;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::iterator
-XbitVector<N, Block, Allocator>::insert(const_iterator position,
-                                        std::forward_iterator auto first,
-                                        std::forward_iterator auto last) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::iterator XbitVector<N, Block, Allocator>::insert(
+    const_iterator position, std::forward_iterator auto first, std::forward_iterator auto last) {
   const difference_type n_signed = std::distance(first, last);
   assert(n_signed >= 0 && "invalid range specified");
   const size_type n = n_signed;
@@ -1087,21 +965,18 @@ XbitVector<N, Block, Allocator>::insert(const_iterator position,
   return r;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::iterator
-XbitVector<N, Block, Allocator>::erase(const_iterator position) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::iterator XbitVector<N, Block, Allocator>::erase(
+    const_iterator position) {
   iterator r = const_iterator_cast(position);
   std::copy(position + 1, this->cend(), r);
   --size_;
   return r;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr XbitVector<N, Block, Allocator>::iterator
-XbitVector<N, Block, Allocator>::erase(const_iterator first,
-                                       const_iterator last) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr XbitVector<N, Block, Allocator>::iterator XbitVector<N, Block, Allocator>::erase(
+    const_iterator first, const_iterator last) {
   iterator r = const_iterator_cast(first);
   difference_type d = last - first;
   std::copy(last, this->cend(), r);
@@ -1109,8 +984,7 @@ XbitVector<N, Block, Allocator>::erase(const_iterator first,
   return r;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr void XbitVector<N, Block, Allocator>::swap(XbitVector& x) noexcept {
   std::swap(this->begin_, x.begin_);
   std::swap(this->size_, x.size_);
@@ -1119,10 +993,8 @@ constexpr void XbitVector<N, Block, Allocator>::swap(XbitVector& x) noexcept {
     std::swap(this->alloc_, x.alloc_);
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
-constexpr void XbitVector<N, Block, Allocator>::resize(size_type sz,
-                                                       value_type x) {
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
+constexpr void XbitVector<N, Block, Allocator>::resize(size_type sz, value_type x) {
   size_type cs = size();
   if (cs < sz) {
     iterator r;
@@ -1143,15 +1015,13 @@ constexpr void XbitVector<N, Block, Allocator>::resize(size_type sz,
     size_ = sz;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr void XbitVector<N, Block, Allocator>::flip() noexcept {
   size_type n = 0;
   for (block_type* p = begin_; n < size_; ++p, n += xbits_per_block) *p = ~*p;
 }
 
-template <std::size_t N, std::unsigned_integral Block,
-          std::copy_constructible Allocator>
+template <std::size_t N, std::unsigned_integral Block, std::copy_constructible Allocator>
 constexpr bool XbitVector<N, Block, Allocator>::invariants() const {
   if (this->begin_ == nullptr) {
     if (this->size_ != 0 || this->cap_ != 0) return false;
@@ -1166,14 +1036,14 @@ constexpr bool XbitVector<N, Block, Allocator>::invariants() const {
 
 namespace biomodern {
 
-template <std::unsigned_integral Block = std::uint8_t,
-          std::copy_constructible Allocator = std::allocator<Block> >
+template <
+    std::unsigned_integral Block = std::uint8_t,
+    std::copy_constructible Allocator = std::allocator<Block> >
 using DibitVector = detail::XbitVector<2, Block, Allocator>;
 
-template <std::unsigned_integral Block = std::uint8_t,
-          std::copy_constructible Allocator = std::allocator<Block> >
+template <
+    std::unsigned_integral Block = std::uint8_t,
+    std::copy_constructible Allocator = std::allocator<Block> >
 using QuadbitVector = detail::XbitVector<4, Block, Allocator>;
 
 }  // namespace biomodern
-
-#endif
